@@ -1,3 +1,12 @@
+# cannot commit image files
+*.czi
+*.tiff
+
+# or any data
+Data/
+data/
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
