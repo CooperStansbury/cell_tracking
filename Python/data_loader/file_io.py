@@ -11,10 +11,8 @@ import pandas as pd
 class OME_writer():
     """A class to write OME tiff files from numpy arrays """
     
-    def __init__(self, scene, tile):
+    def __init__(self, scene):
         self.scene = scene
-        self.tile = tile
-      
         
     def restructure_scene(self):
         """A function to coerse a tensor into a format that
@@ -24,10 +22,10 @@ class OME_writer():
             : sc (np.array) with same shape as input `.czi` but
             single dimension along the tile dimension
         """
-        sc = self.scene[:, self.tile, :, :, :]
+        sc = self.scene[:, :, :, :]
         
         sc = np.moveaxis(sc, -1, 1)
-        sc = np.expand_dims(sc, 2)
+        # sc = np.expand_dims(sc, 2)
         self.scene = sc
         
     
@@ -104,7 +102,9 @@ class CZILoader():
 
     def __init__(self, filepath):
         self.path = filepath
+        # self.img = AICSImage(filepath) 
         self.reader = CziReader(self.path)
+        self.channel_names = self.reader.get_channel_names()
         self.scene = None 
 
     def restructure_scene(self, scene):

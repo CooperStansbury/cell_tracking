@@ -13,7 +13,7 @@ class CellDetector():
         self.cells = None
 
 
-    def get_cells(self, set_attr=True):
+    def get_cells_LoG(self, set_attr=True):
         """A function to return a list of cells 
 
         args:
@@ -35,6 +35,12 @@ class CellDetector():
         else:
             return cells
 
+
+    def plot_contour(self):
+        """A function to plot the contour of an image"""
+        fig, ax = plt.subplots(figsize=(5, 5))
+        qcs = ax.contour(self.image, origin='image')
+        
 
     def plot_cells(self):
         """A function to plot cells and an image in the same window """
