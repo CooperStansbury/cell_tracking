@@ -5,6 +5,9 @@
 *.7z
 *.gif
 
+# vscode config
+.vscode/*
+
 # or any data
 Data/
 data/
