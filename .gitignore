@@ -1,6 +1,9 @@
 # cannot commit image files
 *.czi
 *.tiff
+*.mat
+*.7z
+*.gif
 
 # or any data
 Data/
