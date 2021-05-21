@@ -3,7 +3,9 @@
 % spotpath='G:\ImageProcessing\CurveFitting\BasicMerging\Test1.csv';
 % trackspots=add_spots_to_tracks(trackpath,spotpath);
 function TrackSpots=add_spots_to_tracks(trackpath,spotpath,channelColors)
-    addpath('/Applications/Fiji.app/scripts');       % install ImageJ Fiji and update path
+    addpath('C:\Users\umich\Downloads\fiji-win64\Fiji.app\scripts');
+    addpath('/Applications/Fiji.app/scripts/');
+    % install ImageJ Fiji and update path
     % https://imagej.net/Fiji.html#Downloads
     
     %[tracks, metadata] = importTrackMateTracks('Test1.xml');
@@ -12,7 +14,7 @@ function TrackSpots=add_spots_to_tracks(trackpath,spotpath,channelColors)
     %spots=readtable('Test1.csv');
     spots=readtable(spotpath);
 
-    nt=length(tracks);
+    nt=length(tracks)
 
     %T=table('VariableNames',{'Track','Frame','ScreenX','ScreenY'});
     z=zeros(1,4);

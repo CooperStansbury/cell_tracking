@@ -1,12 +1,10 @@
 % TEST ImageStack =
 % load_czi_data('G:\ImageProcessing\001_PreMitosisDetection\SampleData\BasicSplit.czi',{'AF514,'mCher','H3342'});
 
-
 function ImageStack = load_czi_data(czipath, channelNames)
-    addpath(genpath('G:\External_MATLAB\bfmatlab'));       
-    % install bioformats and update path
+    addpath(genpath('/Applications/bfmatlab/'));
+    addpath(genpath('G:\External_MATLAB\bfmatlab'));                       % install bioformats and update path
     % https://downloads.openmicroscopy.org/bio-formats/6.6.1/artifacts/bfmatlab.zip
-    addpath("/Applications/bfmatlab/");
     
     % AUTOMATED PROCESSING
     dbg=-1;   % handling for tiff/czi
