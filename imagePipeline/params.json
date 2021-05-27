@@ -1,0 +1,6 @@
+{
+    "input_directory": "imagePipeline/inputs/",
+    "input_type": ".czi",
+    "output_directory": "imagePipeline/outputs/"
+
+}

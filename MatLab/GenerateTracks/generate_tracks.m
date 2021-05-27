@@ -36,7 +36,7 @@ writetable(T, outpath)
 % Tn=normalize_stack(T,ZStack,channelNamesRGB);
 
 % basic plot
-% very_basic_plot(T);
+very_basic_plot(T);
 
 
 function T = normalize_stack(T,ZStack,channelNamesRGB)
