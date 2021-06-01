@@ -16,18 +16,15 @@ import imagePipeline.vision.prepare as pr
 class Transformer():
     """a class to manage parameters """
     
-    def __init__(self):
-        pass
-    
-    def save_params(self):
-        """A function to store the parameters used 
-
-        Returns:
-        -----------------------------
-            : NA: prints confirmation or raises ValueError 
+    def __init__(self, params):
         """
+        Parameters:
+        -----------------------------
+            : params (dict): user configs
+        """
+        self.params = params
     
-    def fit(self, image):
+    def fit_image(self, image):
         """ A master function to wrap individual processes 
         
         Parameters:

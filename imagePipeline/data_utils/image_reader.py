@@ -4,7 +4,9 @@ wrapper around czi loading to coerse into standard structure
 
 import os
 import sys
+import json
 from easydict import EasyDict
+from datetime import datetime
 import numpy as np
 import warnings
 from aicsimageio.readers import CziReader
@@ -153,5 +155,28 @@ class cziLoader():
             : czi (image array): the images
             : metadata (dict): metadata for the images
         """
-        
         return self.czi_list[index], self.spec_list[index]
+    
+    
+    def save_metadata(self, index, output_dir):
+        """A function to save the metadata file for a given index
+        
+        Parameters:
+        ----------------------------- 
+            : index (int): zero indexed position of the file in self.paths
+            : output_dir (str): output directory
+                
+        Returns:
+        -----------------------------
+            : NA: prints confirmation
+        """
+        metafile = self.spec_list[index]
+        
+        new_name = datetime.now().strftime(f'metadata_{index}_%d_%m_%Y.json')
+        outpath = f"{output_dir}{new_name}"
+            
+        with open(outpath, 'w') as f:
+            json.dump(metafile, f)
+            
+        print(f"Saved: `{outpath}`")
+    
