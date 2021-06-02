@@ -14,6 +14,58 @@ from xml.etree import ElementTree
 import xmltodict
 from pandas.io.json.normalize import nested_to_record   
 
+
+############################################################
+# FUNCTIONS
+############################################################
+    
+    
+def load_params(params_path):
+    """A function to load the configuration params
+    
+    Parameters:
+    -----------------------------
+        : params_path (str): path to the config file to use
+        
+    Returns:
+    -----------------------------
+        : params (EasyDict): a dictionary with parameters
+    """
+    with open(params_path) as f:
+        params = EasyDict(json.load(f))
+    return params
+
+
+def save_params(params, params_path, output_dir):
+    """A function to store the parameter file withthe datetime appended.
+    
+    
+        Parameters:
+        ----------------------------- 
+           : params (EasyDict): dictionary of parameters to store
+           : input_path (str): input path to the parameter configuration
+           : output_dir (str): output directory
+            
+        Returns:
+        -----------------------------
+            : NA: prints confirmation
+    """
+    base = os.path.basename(params_path)
+    base_name = os.path.splitext(base)[0]
+    
+    new_name = datetime.now().strftime(f'{base_name}_%d_%m_%Y.json')
+    outpath = f"{output_dir}{new_name}"
+    
+    with open(outpath, 'w') as f:
+        json.dump(params, f)
+        
+    print(f"Saved: `{outpath}`")
+    
+
+############################################################
+# CLASSES
+############################################################
+
 class cziLoader():
     """A class to load a .czi image into a simple, 
     common image processing format """
@@ -179,4 +231,3 @@ class cziLoader():
             json.dump(metafile, f)
             
         print(f"Saved: `{outpath}`")
-    
