@@ -12,7 +12,7 @@ import warnings
 from aicsimageio.readers import CziReader
 from xml.etree import ElementTree
 import xmltodict
-from pandas.io.json.normalize import nested_to_record   
+from pandas.io.json._normalize import nested_to_record   
 
 
 ############################################################
@@ -33,33 +33,9 @@ def load_params(params_path):
     """
     with open(params_path) as f:
         params = EasyDict(json.load(f))
-    return params
-
-
-def save_params(params, params_path, output_dir):
-    """A function to store the parameter file withthe datetime appended.
-    
-    
-        Parameters:
-        ----------------------------- 
-           : params (EasyDict): dictionary of parameters to store
-           : input_path (str): input path to the parameter configuration
-           : output_dir (str): output directory
-            
-        Returns:
-        -----------------------------
-            : NA: prints confirmation
-    """
-    base = os.path.basename(params_path)
-    base_name = os.path.splitext(base)[0]
-    
-    new_name = datetime.now().strftime(f'{base_name}_%d_%m_%Y.json')
-    outpath = f"{output_dir}{new_name}"
-    
-    with open(outpath, 'w') as f:
-        json.dump(params, f)
         
-    print(f"Saved: `{outpath}`")
+    params['parameter_input_path'] = params_path
+    return params
     
 
 ############################################################
@@ -78,9 +54,11 @@ class cziLoader():
         """
         self.params = params
         self.input_paths = self._resolve_paths()
-        self.czi_list, self.spec_list = self._load_paths()
 
-
+        
+    #############################################
+    # path resolution operations
+    #############################################
     def _resolve_paths(self):
         """A function to resolve the input path.
         
@@ -91,39 +69,22 @@ class cziLoader():
         """
         paths = []
         
-        input_dir = self.params['input_directory']
-        for f in os.listdir(input_dir):
-            if f.endswith(self.params['input_type']):
-                full_path = f"{input_dir}{f}"
-                paths.append(os.path.abspath(full_path))
-                
+        data_dir = os.path.abspath(self.params['data_directory'])
+        
+        for f in self.params['files']:
+            full_path = f"{data_dir}/{f}"
+            paths.append(os.path.abspath(full_path))
+            
         if len(paths) > 1:
-            msg = f"Current pipeline optimizzed for single image input. Found {len(paths)}."
+            msg = f"Current pipeline optimized for single image input. Found {len(paths)}."
             warnings.warn(msg)
+            
         return paths
     
     
-    def _load_paths(self):
-        """A function to load the files
-        
-        Returns:
-        -----------------------------
-            : czi_list (list of aicsimageio.readers.czi_reader.CziReader): loaded images
-            : spec_list (list of dict): metadata for each file
-        """
-        czi_list = []
-        spec_list = []
-        
-        for _path in self.input_paths:
-            _czi = CziReader(_path)
-            czi_list.append(_czi)
-            
-            spec = self._get_spec(_czi)
-            spec_list.append(spec)
-            
-        return czi_list, spec_list
-    
-    
+    #############################################
+    # metadata operations 
+    #############################################
     def select_metadata(self, metadata):
         """A function to parse the czi metadata. Note - 
         this is a gross way to do this.
@@ -149,6 +110,16 @@ class cziLoader():
         select_metadata['Application_Version'] = meta_dict['Information']['Application']['Version']
         select_metadata['Application_Build'] = meta_dict['Information']['Application']['BuildId']
         
+        # get scaling details
+        for k, v in meta_dict['Scaling']['AutoScaling'].items():
+            new_key = f"Scaling_{k}"
+            select_metadata[new_key] = v
+            
+        for k in meta_dict['Scaling']['Items']['Distance']:
+            new_key = f"Scaling_Dimension_{k['@Id']}"
+            new_value = f"{k['Value']}{k['DefaultUnitFormat']}"
+            select_metadata[new_key] = new_value
+              
         # get channel acquisition details
         for k,v in meta_dict['Information']['Image'].items():
             if isinstance(v, str):
@@ -181,20 +152,25 @@ class cziLoader():
         -----------------------------
             : spec (dict): different parameters that may be useful later on
         """
-        
+        _names = czi.get_channel_names()
         spec = {
             'file_shape' : czi.shape,
             'image_shape' : czi.shape[-2:],
             'n_tiles': czi.shape[3],
             'n_timepoints': czi.shape[1],
             'n_channels' : czi.shape[2],
-            'channel_names': czi.get_channel_names(),
+            'channel_names': _names
         }
+        
+        spec['channel_map'] = dict(zip( _names, range(len(_names))))
         
         meta_dict = self.select_metadata(czi.metadata)
         return {**spec, **meta_dict}
 
-
+    
+    #############################################
+    # item selection
+    #############################################
     def get_item(self, index):
         """A function to return the image and metadata for a single file
         
@@ -207,27 +183,13 @@ class cziLoader():
             : czi (image array): the images
             : metadata (dict): metadata for the images
         """
-        return self.czi_list[index], self.spec_list[index]
-    
-    
-    def save_metadata(self, index, output_dir):
-        """A function to save the metadata file for a given index
+        path = self.input_paths[index]
         
-        Parameters:
-        ----------------------------- 
-            : index (int): zero indexed position of the file in self.paths
-            : output_dir (str): output directory
-                
-        Returns:
-        -----------------------------
-            : NA: prints confirmation
-        """
-        metafile = self.spec_list[index]
+        # load czi 
+        czi = CziReader(path)
         
-        new_name = datetime.now().strftime(f'metadata_{index}_%d_%m_%Y.json')
-        outpath = f"{output_dir}{new_name}"
-            
-        with open(outpath, 'w') as f:
-            json.dump(metafile, f)
-            
-        print(f"Saved: `{outpath}`")
+        # load metadata
+        metadata = self._get_spec(czi)
+        metadata['czi_path'] = path        
+        
+        return czi, metadata

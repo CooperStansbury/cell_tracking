@@ -1,0 +1,18 @@
+{
+    "data_directory": "/nfs/turbo/umms-indikar/shared/projects/live_cell_imaging/2021-05-12-BJ-PF-H2B-4OHT-AfterSort/raw/proliferation/",
+    "files":["2015-05-13-20-Scene12-D3.czi"],
+    "input_type": ".czi",
+    "output_directory": "/home/cstansbu/GIT_REPOSITORIES/cell_tracking/outputs/",
+    "process_channels": ["At425"],
+    "contrast_correction_gain": 3,
+    "static_dilation_h": "m",
+    "dilation_box_size": 2,
+    "gaussian_blur_sigma": 0.5,
+    "rolling_ball_radius": 0.1,
+    "adaptive_hist_clip": 0.05,
+    "adaptive_hist_kernel_size": 5,
+    "gamma_correction": 1,
+    "intensity_rescale_range": [0, 1],
+    "process_chain": ["ball", "dilate",  "rescale"],
+    "grid_shape": [5, 6]
+}
