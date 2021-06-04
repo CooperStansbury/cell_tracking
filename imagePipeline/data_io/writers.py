@@ -69,6 +69,7 @@ class OutputWriter():
             : czi_data (np.array): 6d image array
         """
         scene = czi_data[0]
+        
         output_file_name = f"OME_{self.base_name}.tiff"
         outpath = f"{self.output_dir}{output_file_name}"
         outpath = os.path.abspath(outpath)
