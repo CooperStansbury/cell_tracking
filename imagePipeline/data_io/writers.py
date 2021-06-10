@@ -4,7 +4,7 @@ import json
 from easydict import EasyDict
 from datetime import datetime
 import numpy as np
-import warnings
+import shutil
 import aicsimageio
 from aicsimageio.writers import OmeTiffWriter
 
@@ -56,6 +56,24 @@ class OutputWriter():
         base = os.path.basename(self.metadata['czi_path'])
         base_name = os.path.splitext(base)[0]
         return base_name
+     
+
+    def _get_new_dir(self):
+        """removes and recreates a directory for tile files
+        
+        Returns:
+        ----------------------------- 
+            : new_dir_path (str): path to output_dir + a nested dir for 
+            tile files 
+        """
+        new_dir = f"{self.output_dir}{self.base_name}"
+        
+        if os.path.exists(new_dir):
+            shutil.rmtree(new_dir)
+        
+        os.makedirs(new_dir)
+        
+        return new_dir
         
         
     #############################################
@@ -69,6 +87,7 @@ class OutputWriter():
             : czi_data (np.array): 6d image array
         """
         scene = czi_data[0]
+        scene = np.moveaxis(scene, 1, 2)
         
         output_file_name = f"OME_{self.base_name}.tiff"
         outpath = f"{self.output_dir}{output_file_name}"
@@ -78,7 +97,36 @@ class OutputWriter():
         _writer.save(data=scene)
         print(f"saved: {outpath}")
         
+    
+    def write_tiles(self, czi_data):
+        """A function to save an OME .tiff for each tile
         
+        Parameters:
+        ----------------------------- 
+            : czi_data (np.array): 6d image array
+        """
+        scene = czi_data[0]
+        scene = np.moveaxis(scene, 2, 0)
+        
+        out_dir = self._get_new_dir()
+        
+        for tile in range(scene.shape[0]):
+            tile_row = int(tile / self.params['grid_shape'][1]) + 1
+            tile_column = (tile % self.params['grid_shape'][1]) + 1
+        
+            file_name = f"OME_{self.base_name}_tile_{tile_row}-{tile_column}.tiff"
+            outpath = f"{out_dir}{file_name}"
+            outpath = os.path.abspath(outpath)
+            
+            # reformat to make OME format more consistent
+            save_tile = scene[tile]
+            save_tile = np.expand_dims(save_tile, 1)
+                    
+            _writer = OmeTiffWriter(outpath, overwrite_file=True)
+            _writer.save(data=save_tile)
+            print(f"saved: {outpath}")
+            
+
     def save_params(self):
         """A function to store the parameter file withthe datetime appended.
 
