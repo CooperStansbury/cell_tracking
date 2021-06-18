@@ -1,0 +1,27 @@
+{
+    "data_directory": "/nfs/turbo/umms-indikar/shared/projects/live_cell_imaging/2021-05-12-BJ-PF-H2B-4OHT-AfterSort/test/",
+    "files":["2015-05-13-20-Scene12-D3-Stitched.czi"],
+    "input_type": ".czi",
+    "output_directory": "/nfs/turbo/umms-indikar/shared/projects/live_cell_imaging/2021-05-12-BJ-PF-H2B-4OHT-AfterSort/processed/",
+    "parallel_procs": 36,
+    "process_channels" : {
+        "At520" : ["dilate", "rescale"],
+        "At425" : ["log", "gamma", "dilate", "ball", "rescale"],
+        "mCher" : ["dilate", "rescale"]
+    },
+    "log_correction_gain": 3,
+    "static_dilation_h": 0.2,
+    "dilation_box_size": 1,
+    "gaussian_blur_sigma": 0.01,
+    "rolling_ball_radius": 10,
+    "adaptive_hist_clip": 0.001,
+    "adaptive_hist_kernel_size": 1,
+    "local_eq_radius": 300,
+    "gamma_correction": 1.6,
+    "resize_tiles" : false,
+    "tile_resize_factor": 1,
+    "grid_shape": [5, 6],
+    "resize_quilt": false,
+    "quilt_resize_factor": 1,
+    "stitch_processing": ["log", "dilate", "rescale"]
+}
