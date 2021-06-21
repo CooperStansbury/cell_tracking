@@ -23,11 +23,12 @@ def load_trackmate_dir(dir_path):
     """
     data = {}
     for f in os.listdir(dir_path):
-        fpath = f"{dir_path}{f}"
-        data_name = f.replace(".csv", "").split(" ")[0]
-        df = pd.read_csv(fpath)
-        data[data_name] = df
-        print(f"{data_name} shape: {df.shape}")
+        if '.csv' in f:
+            fpath = f"{dir_path}{f}"
+            data_name = f.replace(".csv", "").split(" ")[0]
+            df = pd.read_csv(fpath)
+            data[data_name] = df
+            print(f"{data_name} shape: {df.shape}")
     return data
 
 
