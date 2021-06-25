@@ -8,13 +8,14 @@ import pandas as pd
 import numpy as np
 
 
-def load_trackmate_dir(dir_path):
+def load_trackmate_dir(dir_path, verbose=False):
     """A function to load all trackmate outputs
     in a directory (.csv only)
     
     Parameters:
     -----------------------------
         : dir_path (str): path to the directory
+        : verbose (bool): should we print?
         
     Returns:
         : data (dict): file base names as keys, 
@@ -28,11 +29,12 @@ def load_trackmate_dir(dir_path):
             data_name = f.replace(".csv", "").split(" ")[0]
             df = pd.read_csv(fpath)
             data[data_name] = df
-            print(f"{data_name} shape: {df.shape}")
+            if verbose:
+                print(f"{data_name} shape: {df.shape}")
     return data
 
 
-def merge_tracks_and_all(data):
+def merge_tracks_and_all(data, verbose=False):
     """A function to to merge the tracks and all spots statistics files
     
     NOTE: missing TRACK_ID dropped
@@ -41,6 +43,7 @@ def merge_tracks_and_all(data):
     -----------------------------
         : data (dict): file base names as keys, 
         pd.DataFrames as values
+        : verbose (bool): should we print?
         
     Returns:
     -----------------------------
@@ -58,7 +61,8 @@ def merge_tracks_and_all(data):
     
     # merge 
     df = pd.merge(spots, tracks, how='left', on=['TRACK_ID'])
-    print(f'merged shape: {df.shape}')
+    if verbose:
+        print(f'merged shape: {df.shape}')
     return df 
    
     
@@ -82,13 +86,14 @@ def min_max_norm(df, column, group_by):
     df.loc[:, new_col_name] = ((df[column] - mins)/(maxes - mins))
     return df
     
-def clean_up_trackSpots(df):
+def clean_up_trackSpots(df, verbose=False):
     """A function to clean up the merged track and all spots 
     stats file.
     
     Parameters:
     -----------------------------
         : df (pd.DataFrame): dataframe merged on TRACK_ID
+        : verbose (bool): should we print?
         
     Returns:
     -----------------------------
@@ -112,7 +117,10 @@ def clean_up_trackSpots(df):
             df = min_max_norm(df, col, group_by='TRACK_ID')
             
     df = df.dropna(axis=1, how='all')
-    print(f"cleaned shape {df.shape}")
+    if verbose:
+        print(f"cleaned shape {df.shape}")
+        
+    df = df.sort_values(by=['TRACK_ID', 'STEP', 'FRAME'])
     return df
     
     
