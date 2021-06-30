@@ -5,6 +5,58 @@ import numpy as np
 from pointpats import centrography
 
 
+
+def count_rescaler(points, frame_size, subregion_div):
+    """A function to aggregate xy position counts into subregions
+    
+    Parameters:
+    -----------------------------
+        : points (pd.DataFrame): 2 column dataframe with POSITION_X,  POSITION_Y, and COUNT (counts of tracks at that spot)
+        : frame_size (tuple): the (x, y) size of the total area
+        : subregion_div (tuple): the factor by which (x, y) of total area will be divided
+        
+    Returns:
+    -----------------------------
+        : x (1d np.array): x coordinate of box centroid
+        : y (1d np.array): y coordinate of box centroid
+        : z (1d np.array): z count of trajectories in box
+    """
+    x = []
+    y = []
+    z = []
+    
+    subregion_area = int(frame_size[0] / subregion_div[0]) * int(frame_size[1] / subregion_div[1])
+    
+    x_iter = np.linspace(0, frame_size[0], subregion_div[0]+1, dtype=int)
+    y_iter = np.linspace(0, frame_size[1], subregion_div[1]+1, dtype=int)
+
+    for i, x_coord in enumerate(x_iter[1:]):
+        # note that 'i' is the 'x' index - 1
+        prev_x_coord = x_iter[i]
+        
+        for j, y_coord in enumerate(y_iter[1:]):
+            prev_y_coord = y_iter[j]
+            
+            mask = (points['POSITION_X'] >= prev_x_coord) & (points['POSITION_X'] < x_coord) & \
+                   (points['POSITION_Y'] >= prev_y_coord) & (points['POSITION_Y'] < y_coord)
+            
+#             hits = np.std(points[mask].groupby('FRAME')['COUNT'].sum())
+
+            hits = points[mask].groupby('FRAME')['COUNT'].count().to_numpy()
+            
+            if len(hits) > 1: 
+    
+                hits = hits[-1] - hits[0]
+            else:
+                hits = 0
+        
+            x.append(x_coord)
+            y.append(y_coord)
+            z.append(hits)
+
+    return x, y, z      
+
+
 def get_densities(points, frame_size, subregion_div):
     """A function to return density estimates for subregions of 
     size (x_subdiv, y_subdiv).

@@ -64,7 +64,26 @@ def merge_tracks_and_all(data, verbose=False):
     if verbose:
         print(f'merged shape: {df.shape}')
     return df 
-   
+  
+    
+def strip_low_intensities(df, column, quantile):
+    """A function to replace low intensity values with zero
+    
+    Parameters:
+    -----------------------------
+        : df (pd.DataFrame): dataframe merged on TRACK_ID
+        : column (str): column to use
+        : quantile (float): intensities below this mark with be replaced with 0
+        
+    Returns:
+    -----------------------------
+        : df (pd.DataFrame): dataframe with column corrected in place
+    """
+    q = df[column].quantile(quantile)
+    
+    df[column] = np.where(df[column] < q, 0, df[column])
+    return df
+    
     
 def min_max_norm(df, column, group_by):
     """A function to perform min/max scaling
@@ -86,7 +105,7 @@ def min_max_norm(df, column, group_by):
     df.loc[:, new_col_name] = ((df[column] - mins)/(maxes - mins))
     return df
     
-def clean_up_trackSpots(df, verbose=False):
+def clean_up_trackSpots(df, quantile, verbose=False):
     """A function to clean up the merged track and all spots 
     stats file.
     
@@ -114,6 +133,9 @@ def clean_up_trackSpots(df, verbose=False):
     
     for col in df.columns:
         if 'MEAN_INTENSITY' in col:
+            
+            df = strip_low_intensities(df, col, quantile)
+            
             df = min_max_norm(df, col, group_by='TRACK_ID')
             
     df = df.dropna(axis=1, how='all')
