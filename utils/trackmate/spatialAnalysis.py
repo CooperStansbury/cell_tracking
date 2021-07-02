@@ -40,8 +40,6 @@ def count_rescaler(points, frame_size, subregion_div):
             mask = (points['POSITION_X'] >= prev_x_coord) & (points['POSITION_X'] < x_coord) & \
                    (points['POSITION_Y'] >= prev_y_coord) & (points['POSITION_Y'] < y_coord)
             
-#             hits = np.std(points[mask].groupby('FRAME')['COUNT'].sum())
-
             hits = points[mask].groupby('FRAME')['COUNT'].count().to_numpy()
             
             if len(hits) > 1: 

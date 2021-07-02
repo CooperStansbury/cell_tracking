@@ -8,7 +8,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 
 
-def plot_quiver(df, group, colorcolumn, cmap='jet'):
+def plot_quiver(df, group, colorcolumn, cmap='jet', scale=0.9, width=0.005):
     """A function to plot a quiver plot 
           
     Parameters:
@@ -17,6 +17,8 @@ def plot_quiver(df, group, colorcolumn, cmap='jet'):
         : group (str): valid column name to group start and end points 
         : colorcolumn (str): valid column containning color values
         : cmap (str): a color map name
+        : scale (float): scale factor for quiver
+        : width (float): width factor for quiver
     """
     colormap = matplotlib.cm.get_cmap('jet')
 
@@ -50,8 +52,8 @@ def plot_quiver(df, group, colorcolumn, cmap='jet'):
                    scale_units='xy', 
                    color=C,
                    angles='xy', 
-                   scale=0.9,
-                   width=0.005,
+                   scale=scale,
+                   width=width,
                    cmap=cmap)
     
     return q
