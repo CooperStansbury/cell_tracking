@@ -8,6 +8,47 @@ from matplotlib.colors import Normalize
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 
+def control_plot(box):
+    """A function to create the control-style plot for different discrete 
+    bins of the x coordinate
+    
+        Parameters:
+    -----------------------------
+        : boxes (pd.DataFrame): dataframe returned from utils.trackmate.woundHealing.get_leading_cells()
+    
+    """
+    box['X'] = box['POSITION_X'].astype(int)
+    box['Direction'] = np.where(box['type'] == 'upper', 'Above Wound', 'Below Wound')
+
+    top_boxes = box[box['type'] == 'upper'].sort_values(by=['BOX', 'FRAME'])
+    top_boxes['y_diff'] = top_boxes['POSITION_Y'].diff(1)
+    top_boxes['y_diff'] = np.where(top_boxes['FRAME'] == 0, 0, top_boxes['y_diff'])
+    top_boxes_grp = top_boxes.groupby(['X', 'Direction'], as_index=False)['y_diff'].mean()
+
+    bot_boxes = box[box['type'] == 'lower'].sort_values(by=['BOX', 'FRAME'])
+    bot_boxes['y_diff'] = bot_boxes['POSITION_Y'].diff(1)
+    bot_boxes['y_diff'] = np.where(bot_boxes['FRAME'] == 0, 0, bot_boxes['y_diff'])
+    bot_boxes_grp = bot_boxes.groupby(['X', 'Direction'], as_index=False)['y_diff'].mean()
+
+    sns.barplot(data=top_boxes_grp,
+                x='X',
+                y='y_diff',
+                hue='Direction',
+                palette=['C1'])
+
+    sns.barplot(data=bot_boxes_grp,
+                x='X',
+                y='y_diff',
+                hue='Direction',
+                palette=['C7'])
+
+    mean_upper = top_boxes_grp['y_diff'].mean()
+    mean_lower = bot_boxes_grp['y_diff'].mean()
+
+    plt.axhline(y=mean_upper, ls=':', lw=3, c="C1")
+    plt.axhline(y=mean_lower, ls=':', lw=3, c="C7")
+
+
 def shark_plot(boxes, cmap):
     """A function to plot the leading edge of the wound over time
           
@@ -17,7 +58,7 @@ def shark_plot(boxes, cmap):
         : cmap (matplotlib.colors.ListedColormap): a color map, NOTE the str
     """
     a_list = []
-    for t in boxes['FRAME'].unique():
+    for t in range(boxes['FRAME'].max()):
 
         upper = boxes[(boxes['FRAME'] == t) & (boxes['type'] == 'upper')]
         a = upper['FRAME_NORM'].unique()[0] 

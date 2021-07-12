@@ -1,5 +1,7 @@
 import pandas as pd
 import numpy as np
+import warnings
+
 
 # spatial analysis
 from pointpats import centrography
@@ -70,6 +72,7 @@ def get_densities(points, frame_size, subregion_div):
         : density_matrix (2d np.array): a frame_size / subregion_div matrix of densities
         : dipersion (2d np.array): mean distance of points to center of tile
     """
+    warnings.simplefilter(action='ignore', category=RuntimeWarning)
     
     density_matrix = np.zeros(subregion_div)
     dipersion = np.zeros(subregion_div)

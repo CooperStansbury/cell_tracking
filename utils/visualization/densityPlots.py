@@ -6,7 +6,6 @@ import seaborn as sns
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 
-
 def density_compare(init_density, final_density):
     """A function to two density plots based on differnet frames
     
@@ -23,8 +22,8 @@ def density_compare(init_density, final_density):
                    cmap='viridis', 
                    origin='lower')
     ax1.set_title("Initial Density")
-    ax1.set_ylabel("Y Coordinate")
-    ax1.set_xlabel("X Coordinate")
+    ax1.set_ylabel("Y Coordinate Bin")
+    ax1.set_xlabel("X Coordinate Bin")
     divider = make_axes_locatable(ax1)
     cax = divider.append_axes("right", size="5%", pad=0.1)
     plt.colorbar(im1, cax=cax)
@@ -35,7 +34,7 @@ def density_compare(init_density, final_density):
                    cmap='viridis', 
                    origin='lower')
     ax2.set_title("Final Density")
-    ax2.set_xlabel("X Coordinate")
+    ax2.set_xlabel("X Coordinate Bin")
     divider = make_axes_locatable(ax2)
     cax = divider.append_axes("right", size="5%", pad=0.1)
     plt.colorbar(im1, cax=cax)
