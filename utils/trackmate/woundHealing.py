@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
+from sklearn.cluster import AgglomerativeClustering
 from sklearn import svm
 from scipy.spatial.distance import cdist
 from scipy import interpolate
@@ -133,18 +134,19 @@ def interpolate_3d(x, y, z, n=10, r=10):
 
 
 
-def estimate_cut(df, kernel='poly', C=1, degree=3):
+def estimate_cut(df, cluster='ward', kernel='poly', C=1, degree=3, wx=0.1):
     """A function to estimate the center of the wound, from which 
     may be computed the leading cells
-    
     
     Parameters:
     -----------------------------
         : df (pd.DataFrame): must have POSITION_X and POSITION_Y
+        : cluster (str): clustering algorithm to use, may be 'kmeans' or 'ward'
         : kernel (str):  It must be one of ‘linear’, ‘poly’, ‘rbf’, 
         ‘sigmoid’, ‘precomputed’ or a callable. 
         : C (float): regularization param
         : degree (int): the degree of the svm poluynomial fit
+        : wx (float): scalar weight of the x_position in KMeans
         
     Returns:
     -----------------------------
@@ -154,9 +156,19 @@ def estimate_cut(df, kernel='poly', C=1, degree=3):
     
     init_frame = df[df['FRAME'] == df['FRAME'].min()].reset_index()
     
-    # compute Kmeans classes (always 2)
-    kmeans = KMeans(n_clusters=2).fit(init_frame[['POSITION_Y']])
-    init_frame.loc[:, 'CLUSTER'] = kmeans.labels_
+    init_frame['w_POSITION_X'] =  init_frame['POSITION_X'] * wx
+    
+    if cluster == 'kmeans':
+        # compute Kmeans classes (always 2)
+        clustering = KMeans(n_clusters=2, 
+                            init='random', 
+                            algorithm='elkan').fit(init_frame[['w_POSITION_X', 'POSITION_Y']])
+    elif cluster == 'ward':
+        clustering = AgglomerativeClustering().fit(init_frame[['w_POSITION_X', 'POSITION_Y']])
+    else:
+        raise ValueError("`cluster` param in estimate_cut() must be `kmeans` or `ward`.")
+    
+    init_frame.loc[:, 'CLUSTER'] = clustering.labels_
     
     # compute maximal decision boundary
     clf = svm.SVC(C=C, kernel=kernel, degree=degree)
